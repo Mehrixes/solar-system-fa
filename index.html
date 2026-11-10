@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>رصدخانه منظومه شمسی — از خورشید تا کهکشان راه شیری</title>
+<meta name="description" content="منظومه شمسی را بچرخان، زوم کن، روی هر سیاره کلیک کن و از دوربین جیمز وب، هابل و سطح ماه تماشا کن.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;600;800;900&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#02030a;--panel:rgba(10,14,34,.82);--line:rgba(255,255,255,.12);--gold:#f5c542;--cyan:#7dd8ff;--violet:#b78cff}
+html,body{height:100%;overflow:hidden;background:var(--bg);color:#eef2ff;font-family:Vazirmatn,system-ui,sans-serif}
+#scene{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:none;cursor:grab}
+#scene:active{cursor:grabbing}
+.top{position:fixed;top:0;right:0;left:0;z-index:20;display:flex;justify-content:space-between;align-items:flex-start;padding:14px 16px;pointer-events:none}
+.brand{pointer-events:auto;background:var(--panel);border:1px solid var(--line);backdrop-filter:blur(14px);border-radius:18px;padding:10px 14px;max-width:520px}
+.brand h1{font-size:19px;font-weight:900;line-height:1.3}
+.brand h1 span{color:var(--gold)}
+.brand p{font-size:12.5px;opacity:.82;line-height:1.7;margin-top:2px}
+.badge{display:inline-flex;gap:6px;align-items:center;font-size:11px;background:rgba(245,197,66,.14);border:1px solid rgba(245,197,66,.35);color:#ffe9a8;padding:4px 9px;border-radius:999px;margin-top:7px}
+.live{pointer-events:auto;background:var(--panel);border:1px solid var(--line);backdrop-filter:blur(14px);border-radius:16px;padding:9px 12px;text-align:left;min-width:168px}
+.live b{font-size:12px;display:block;color:var(--cyan)}
+.live span{font-size:11px;opacity:.8;line-height:1.6;display:block}
+#panel{position:fixed;z-index:25;top:96px;right:16px;width:340px;max-width:calc(100vw - 32px);background:var(--panel);border:1px solid var(--line);backdrop-filter:blur(18px);border-radius:22px;padding:18px;box-shadow:0 20px 60px rgba(0,0,0,.55);max-height:calc(100vh - 250px);overflow:auto;scrollbar-width:thin}
+#panel::-webkit-scrollbar{width:5px}#panel::-webkit-scrollbar-thumb{background:#334;border-radius:99px}
+.eyebrow{font-size:11px;letter-spacing:.5px;color:var(--cyan);font-weight:700}
+#pName{font-size:28px;font-weight:900;line-height:1.2;margin:4px 0 2px}
+#pEn{font-size:12px;opacity:.65;letter-spacing:1px}
+#pDesc{font-size:13.5px;line-height:1.9;opacity:.92;margin:10px 0 14px}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.stat{background:rgba(255,255,255,.06);border:1px solid var(--line);border-radius:14px;padding:10px}
+.stat small{font-size:11px;opacity:.7;display:block}
+.stat b{font-size:15px;line-height:1.4;display:block;margin-top:2px}
+.stat.full{grid-column:1/-1}
+.feature{background:linear-gradient(135deg,rgba(245,197,66,.18),rgba(183,140,255,.16));border:1px solid rgba(245,197,66,.35);border-radius:14px;padding:12px;font-size:13px;line-height:1.9;margin-top:10px}
+.feature b{color:#ffe9a8}
+.hint{font-size:11.5px;opacity:.65;line-height:1.7;margin-top:10px}
+#planetBar{position:fixed;z-index:22;bottom:118px;right:50%;transform:translateX(50%);display:flex;gap:7px;max-width:calc(100vw - 20px);overflow-x:auto;padding:6px;scrollbar-width:none}
+#planetBar::-webkit-scrollbar{display:none}
+.chip{flex:0 0 auto;border:1px solid var(--line);background:rgba(8,12,30,.78);backdrop-filter:blur(12px);color:#fff;border-radius:999px;padding:7px 12px;font-family:inherit;font-size:12.5px;cursor:pointer;white-space:nowrap}
+.chip:hover,.chip.active{border-color:var(--gold);background:rgba(245,197,66,.18)}
+#toolbar{position:fixed;z-index:22;bottom:62px;right:50%;transform:translateX(50%);display:flex;gap:7px;max-width:calc(100vw - 16px);overflow-x:auto;padding:4px;scrollbar-width:none}
+#toolbar::-webkit-scrollbar{display:none}
+.cam{flex:0 0 auto;border:1px solid var(--line);background:rgba(8,12,30,.82);backdrop-filter:blur(12px);color:#fff;border-radius:14px;padding:9px 12px;font-family:inherit;font-size:12.5px;cursor:pointer;text-align:center;line-height:1.3}
+.cam small{display:block;font-size:10.5px;opacity:.65}
+.cam.active{background:#f5c542;color:#111;border-color:#f5c542}.cam.active small{color:#333}
+#controls{position:fixed;z-index:22;bottom:12px;right:50%;transform:translateX(50%);display:flex;gap:8px;align-items:center;background:rgba(8,12,30,.82);border:1px solid var(--line);backdrop-filter:blur(12px);border-radius:999px;padding:7px 10px;max-width:calc(100vw - 16px);overflow-x:auto;white-space:nowrap;scrollbar-width:none}
+#controls::-webkit-scrollbar{display:none}
+#controls button{border:1px solid var(--line);background:rgba(255,255,255,.07);color:#fff;border-radius:999px;padding:6px 11px;font-family:inherit;font-size:12px;cursor:pointer}
+#controls button.on{background:#fff;color:#111}
+#controls label{font-size:11.5px;opacity:.85;display:flex;align-items:center;gap:6px}
+#controls input[type=range]{width:110px;accent-color:#f5c542}
+#toast{position:fixed;z-index:30;top:50%;right:50%;transform:translate(50%,-50%);background:rgba(5,8,22,.92);border:1px solid var(--gold);color:#fff;padding:16px 20px;border-radius:18px;text-align:center;max-width:88vw;display:none;line-height:1.9}
+#toast b{font-size:16px}#toast span{display:block;font-size:13px;opacity:.85}
+#loader{position:fixed;inset:0;z-index:50;background:#02030a;display:flex;flex-direction:column;gap:14px;align-items:center;justify-content:center;transition:opacity .6s}
+#loader.hide{opacity:0;pointer-events:none}
+.orbit-load{width:74px;height:74px;border:2px solid rgba(255,255,255,.15);border-top-color:#f5c542;border-radius:50%;animation:spin 1s linear infinite;position:relative}
+.orbit-load:after{content:"☀️";position:absolute;inset:0;display:grid;place-items:center;font-size:26px;animation:none}
+@keyframes spin{to{transform:rotate(360deg)}}
+#loader p{font-size:13px;opacity:.75}
+@media (max-width:760px){
+  .brand{padding:8px 11px;max-width:calc(100vw - 120px)}
+  .brand h1{font-size:15px}.brand p{display:none}
+  .live{min-width:96px;padding:7px 9px}.live span{display:none}
+  #panel{top:auto;bottom:168px;right:10px;left:10px;width:auto;max-height:38vh;padding:14px;border-radius:18px}
+  #pName{font-size:22px}#pDesc{font-size:12.5px;margin:7px 0 10px}
+  #planetBar{bottom:118px}
+  #toolbar{bottom:72px}
+  #controls{bottom:10px}
+  #controls input[type=range]{width:72px}
+}
+</style>
+</head>
+<body>
+<canvas id="scene"></canvas>
+
+<div id="loader"><div class="orbit-load"></div><p>آسمان در حال باز شدن است… خورشید، سیاره‌ها و کهکشان در راه‌اند</p></div>
+
+<header class="top">
+  <div class="brand">
+    <h1>🔭 رصدخانه <span>منظومه شمسی</span></h1>
+    <p>بچرخان، زوم کن، روی هر سیاره کلیک کن. از دوربین جیمز وب و هابل ببین، طلوع خورشید را از ماه تماشا کن و باران الماس را در اورانوس بگیر.</p>
+    <span class="badge">✦ زنده و تعاملی &nbsp;•&nbsp; چرخش واقعی مدارها &nbsp;•&nbsp; کهکشان راه شیری</span>
+  </div>
+  <div class="live"><b id="camName">📷 دوربین آزاد</b><span id="camDesc">با موس بچرخان و با اسکرول زوم کن.<br>روی هر جرم آسمانی کلیک کن.</span></div>
+</header>
+
+<aside id="panel" aria-live="polite">
+  <div class="eyebrow" id="pKind">ستارهٔ منظومهٔ ما</div>
+  <h2 id="pName">خورشید</h2>
+  <div id="pEn">SUN • SOL</div>
+  <p id="pDesc">قلب منظومه شمسی. ۹۹٫۸۶٪ جرم کل منظومه اینجاست و نورش بعد از حدود ۸ دقیقه به زمین می‌رسد.</p>
+  <div class="stats">
+    <div class="stat"><small>قطر</small><b id="pDia">۱٬۳۹۲٬۷۰۰ کیلومتر</b></div>
+    <div class="stat"><small>فاصله از خورشید</small><b id="pDist">— خودش خورشید است</b></div>
+    <div class="stat"><small>قدمت / سن</small><b id="pAge">۴٫۶ میلیارد سال</b></div>
+    <div class="stat"><small>دمای سطح</small><b id="pTemp">۵٬۵۰۵ درجه سانتی‌گراد</b></div>
+    <div class="stat"><small>یک سال / یک روز</small><b id="pYear">— / ۲۵ تا ۳۵ روز</b></div>
+    <div class="stat"><small>قمرها</small><b id="pMoons">۸ سیاره در مدارش</b></div>
+    <div class="stat full"><small>جرم و اندازه نسبت به زمین</small><b id="pSize">۱۰۹ برابر قطر زمین • ۳۳۳٬۰۰۰ برابر جرم زمین</b></div>
+  </div>
+  <div class="feature"><b>✦ ویژگی خاص:</b> <span id="pFeat">هر ثانیه حدود ۴ میلیون تُن جرمش به انرژی تبدیل می‌شود؛ همان نوری که زندگی زمین را ممکن کرده.</span></div>
+  <p class="hint">راهنما: برای دیدن حلقهٔ زحل زوم کن و دوربین «زحل از نزدیک» را بزن. برای جیمز وب، دوربین جیمز وب را انتخاب کن — کنار ماه می‌ایستد.</p>
+</aside>
+
+<nav id="planetBar" aria-label="سیاره‌ها"></nav>
+
+<nav id="toolbar" aria-label="دوربین‌ها">
+  <button class="cam active" data-cam="free">🛰️ آزاد<small>چرخش و زوم با موس</small></button>
+  <button class="cam" data-cam="jwst">🔭 جیمز وب<small>کنار ماه، در L2</small></button>
+  <button class="cam" data-cam="hubble">📡 هابل<small>مدار نزدیک زمین</small></button>
+  <button class="cam" data-cam="moon">🌙 سطح ماه<small>طلوع خورشید</small></button>
+  <button class="cam" data-cam="saturn">🪐 زحل از نزدیک<small>حلقه‌ها با جزئیات</small></button>
+  <button class="cam" data-cam="sun">☀️ خورشید<small>از نزدیک و سوزان</small></button>
+  <button class="cam" data-cam="galaxy">🌌 کهکشان<small>راه شیری کامل</small></button>
+  <button class="cam" data-cam="uranus">💎 باران الماس<small>اورانوس</small></button>
+</nav>
+
+<div id="controls">
+  <button id="pauseBtn">⏸ توقف</button>
+  <label>سرعت <input id="speed" type="range" min="0" max="3" step="0.1" value="1"></label>
+  <button id="orbitBtn" class="on">مدارها</button>
+  <button id="labelBtn" class="on">نام‌ها</button>
+  <button id="trailBtn">دنبالهٔ دنباله‌دار</button>
+  <button id="resetBtn">↺ نمای کلی</button>
+</div>
+
+<div id="toast"><b id="toastTitle"></b><span id="toastText"></span></div>
+
+<script type="importmap">
+{"imports":{"three":"https://unpkg.com/three@0.160.0/build/three.module.js","three/addons/":"https://unpkg.com/three@0.160.0/examples/jsm/"}}
+</script>
+
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+const canvas=document.getElementById('scene');
+const renderer=new THREE.WebGLRenderer({canvas,antialias:true});
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+renderer.setSize(innerWidth,innerHeight);
+const scene=new THREE.Scene();
+scene.background=new THREE.Color(0x02030a);
+const camera=new THREE.PerspectiveCamera(55,innerWidth/innerHeight,0.1,2000);
+camera.position.set(0,48,95);
+const controls=new OrbitControls(camera,renderer.domElement);
+controls.enableDamping=true; controls.dampingFactor=.06; controls.minDistance=4; controls.maxDistance=420;
+
+/* ---------- نور و ستاره‌های پس‌زمینه ---------- */
+scene.add(new THREE.AmbientLight(0x445588,.55));
+const sunLight=new THREE.PointLight(0xffe9b0,2.2,0,0); scene.add(sunLight);
+function starField(n,rMin,rMax,size,color){
+  const g=new THREE.BufferGeometry(), p=new Float32Array(n*3), c=new Float32Array(n*3);
+  const col=new THREE.Color(color);
+  for(let i=0;i<n;i++){
+    const r=rMin+Math.random()*(rMax-rMin), th=Math.random()*Math.PI*2, ph=Math.acos(2*Math.random()-1);
+    p[i*3]=r*Math.sin(ph)*Math.cos(th); p[i*3+1]=r*Math.cos(ph)*.55; p[i*3+2]=r*Math.sin(ph)*Math.sin(th);
+    const v=.55+Math.random()*.45; c[i*3]=col.r*v; c[i*3+1]=col.g*v; c[i*3+2]=col.b*v;
+  }
+  g.setAttribute('position',new THREE.BufferAttribute(p,3)); g.setAttribute('color',new THREE.BufferAttribute(c,3));
+  return new THREE.Points(g,new THREE.PointsMaterial({size,vertexColors:true,sizeAttenuation:true,transparent:true,opacity:.95}));
+}
+scene.add(starField(6500,180,650,1.5,0xffffff));
+scene.add(starField(900,180,600,2.4,0x9ecbff));
+
+/* ---------- بافت‌های رویه‌ای ---------- */
+function tex(w,h,fn){const c=document.createElement('canvas');c.width=w;c.height=h;const x=c.getContext('2d');fn(x,w,h);const t=new THREE.CanvasTexture(c);t.colorSpace=THREE.SRGBColorSpace;return t;}
+function bands(colors){return tex(512,256,(x,w,h)=>{let y=0;colors.forEach(([col,hh])=>{x.fillStyle=col;x.fillRect(0,y,w,hh);y+=hh;});for(let i=0;i<2600;i++){x.fillStyle=`rgba(0,0,0,${Math.random()*.14})`;x.fillRect(Math.random()*w,Math.random()*h,Math.random()*28,1.5);}});}
+function noise(base,spots){return tex(512,256,(x,w,h)=>{x.fillStyle=base;x.fillRect(0,0,w,h);spots.forEach(s=>{for(let i=0;i<42;i++){x.fillStyle=s;x.beginPath();x.arc(Math.random()*w,Math.random()*h,2+Math.random()*18,0,7);x.fill();}});});}
+function labelSprite(text){
+  const c=document.createElement('canvas');c.width=256;c.height=64;const x=c.getContext('2d');
+  x.font='700 28px Vazirmatn, sans-serif';x.textAlign='center';x.textBaseline='middle';
+  x.shadowColor='rgba(0,0,0,.9)';x.shadowBlur=8;x.fillStyle='#fff';x.fillText(text,128,32);
+  const t=new THREE.CanvasTexture(c);t.colorSpace=THREE.SRGBColorSpace;
+  const s=new THREE.Sprite(new THREE.SpriteMaterial({map:t,transparent:true,depthWrite:false}));
+  s.scale.set(9,2.25,1); return s;
+}
+function glowTexture(){return tex(128,128,(x,w,h)=>{const g=x.createRadialGradient(64,64,2,64,64,62);g.addColorStop(0,'rgba(255,220,130,1)');g.addColorStop(.35,'rgba(255,160,60,.55)');g.addColorStop(1,'rgba(255,120,0,0)');x.fillStyle=g;x.fillRect(0,0,w,h);});}
+
+/* ---------- داده‌ها ---------- */
+const INFO={
+sun:{kind:'ستارهٔ منظومهٔ ما',name:'خورشید',en:'SUN • SOL',desc:'قلب منظومه شمسی. ۹۹٫۸۶٪ جرم کل منظومه اینجاست و نورش بعد از حدود ۸ دقیقه به زمین می‌رسد.',dia:'۱٬۳۹۲٬۷۰۰ کیلومتر',dist:'— خودش خورشید است',age:'۴٫۶ میلیارد سال',temp:'۵٬۵۰۵ درجه سانتی‌گراد',year:'— / ۲۵ تا ۳۵ روز',moons:'۸ سیاره در مدارش',size:'۱۰۹ برابر قطر زمین • ۳۳۳٬۰۰۰ برابر جرم زمین',feat:'هر ثانیه حدود ۴ میلیون تُن جرمش به انرژی تبدیل می‌شود؛ همان نوری که زندگی زمین را ممکن کرده.'},
+mercury:{kind:'سیارهٔ سنگی • نزدیک‌ترین به خورشید',name:'عطارد',en:'MERCURY',desc:'کوچک‌ترین سیاره و نزدیک‌ترین به خورشید. سطحش پر از دهانه است و یک روزش از یک سالش طولانی‌تر است.',dia:'۴٬۸۷۹ کیلومتر',dist:'۵۷٫۹ میلیون کیلومتر',age:'۴٫۵ میلیارد سال',temp:'−۱۸۰ تا ۴۳۰ درجه',year:'۸۸ روز / ۵۹ روز زمینی',moons:'۰ قمر',size:'۰٫۳۸ برابر زمین',feat:'یک روز کامل عطارد ۵۹ روز زمینی طول می‌کشد، اما سالش فقط ۸۸ روز است — روز از سال بلندتر!'},
+venus:{kind:'سیارهٔ سنگی • داغ‌ترین سیاره',name:'زهره',en:'VENUS',desc:'داغ‌ترین سیارهٔ منظومه، با آسمانی از ابرهای اسید سولفوریک. برعکس بقیه می‌چرخد؛ خورشید در آن از غرب طلوع می‌کند.',dia:'۱۲٬۱۰۴ کیلومتر',dist:'۱۰۸٫۲ میلیون کیلومتر',age:'۴٫۵ میلیارد سال',temp:'۴۶۵ درجه (همیشه)',year:'۲۲۵ روز / ۲۴۳ روز زمینی',moons:'۰ قمر',size:'۰٫۹۵ برابر زمین',feat:'چرخش وارونه دارد و چنان داغ است که سرب در سطحش ذوب می‌شود؛ داغ‌ترین سیاره، با اینکه دومین سیاره است.'},
+earth:{kind:'سیارهٔ سنگی • خانهٔ ما',name:'زمین',en:'EARTH',desc:'تنها جایی که می‌شناسیم زندگی دارد. ۷۱٪ سطحش آب است و یک سپر مغناطیسی از ما در برابر باد خورشیدی محافظت می‌کند.',dia:'۱۲٬۷۴۲ کیلومتر',dist:'۱۴۹٫۶ میلیون کیلومتر',age:'۴٫۵۴ میلیارد سال',temp:'میانگین ۱۵ درجه',year:'۳۶۵٫۲۵ روز / ۲۴ ساعت',moons:'۱ قمر — ماه',size:'۱ برابر (معیار)',feat:'تنها سیارهٔ شناخته‌شده با زندگی، آب مایع روی سطح و اکسیژن در هوا. از فضا یک «نقطهٔ آبی کمرنگ» است.'},
+mars:{kind:'سیارهٔ سنگی • سیارهٔ سرخ',name:'مریخ',en:'MARS',desc:'دنیای سرخ با بزرگ‌ترین آتشفشان منظومه، المپوس مونس. روزی روزگاری رودخانه داشته و انسان دارد برای رفتن به آن آماده می‌شود.',dia:'۶٬۷۷۹ کیلومتر',dist:'۲۲۷٫۹ میلیون کیلومتر',age:'۴٫۶ میلیارد سال',temp:'میانگین −۶۳ درجه',year:'۶۸۷ روز / ۲۴٫۶ ساعت',moons:'۲ قمر — فوبوس و دیموس',size:'۰٫۵۳ برابر زمین',feat:'کوه المپوس مونس با ۲۲ کیلومتر ارتفاع، حدود دو و نیم برابر اورست است؛ بزرگ‌ترین آتشفشان منظومه شمسی.'},
+jupiter:{kind:'غول گازی • بزرگ‌ترین سیاره',name:'مشتری',en:'JUPITER',desc:'غول منظومه؛ همهٔ سیاره‌های دیگر با هم در آن جا می‌شوند. لکهٔ سرخ بزرگش طوفانی است بزرگ‌تر از زمین که صدها سال است می‌چرخد.',dia:'۱۳۹٬۸۲۰ کیلومتر',dist:'۷۷۸٫۵ میلیون کیلومتر',age:'۴٫۶ میلیارد سال',temp:'میانگین −۱۱۰ درجه',year:'۱۱٫۸۶ سال / ۹٫۹ ساعت',moons:'۹۵ قمر شناخته‌شده',size:'۱۱٫۲ برابر زمین • ۳۱۸ برابر جرم زمین',feat:'لکهٔ سرخ بزرگ یک طوفان غول‌پیکر است که دست‌کم ۳۰۰ سال است ادامه دارد و به‌تنهایی از زمین بزرگ‌تر است.'},
+saturn:{kind:'غول گازی • پادشاه حلقه‌ها',name:'زحل',en:'SATURN',desc:'زیباترین حلقه‌های منظومه را دارد؛ حلقه‌هایی از یخ و سنگ که بعضی جاها فقط ۱۰ متر ضخامت دارند و ۲۸۰ هزار کیلومتر پهنا.',dia:'۱۱۶٬۴۶۰ کیلومتر',dist:'۱٫۴۳ میلیارد کیلومتر',age:'۴٫۶ میلیارد سال',temp:'میانگین −۱۴۰ درجه',year:'۲۹٫۴ سال / ۱۰٫۷ ساعت',moons:'۱۴۶ قمر شناخته‌شده',size:'۹٫۱ برابر زمین • ۹۵ برابر جرم زمین',feat:'حلقه‌هایش از میلیاردها قطعه یخ ساخته شده‌اند و اگر چگالی‌اش را حساب کنی، روی آب شناور می‌ماند — سبک‌ترین سیاره است.'},
+uranus:{kind:'غول یخی • سیارهٔ پهلو خوابیده',name:'اورانوس',en:'URANUS',desc:'به پهلو می‌چرخد؛ محور چرخشش ۹۸ درجه کج است. در عمقش فشار چنان زیاد است که گفته می‌شود باران الماس می‌بارد.',dia:'۵۰٬۷۲۴ کیلومتر',dist:'۲٫۸۷ میلیارد کیلومتر',age:'۴٫۶ میلیارد سال',temp:'میانگین −۱۹۵ درجه',year:'۸۴ سال / ۱۷٫۲ ساعت',moons:'۲۸ قمر شناخته‌شده',size:'۴ برابر زمین',feat:'💎 باران الماس: در اعماقش متان زیر فشار خرد می‌شود و بلورهای الماس مثل باران به سمت هسته فرو می‌ریزند. دکمهٔ «باران الماس» را بزن و ببین.'},
+neptune:{kind:'غول یخی • دورترین سیاره',name:'نپتون',en:'NEPTUNE',desc:'دورترین سیاره از خورشید؛ بادهایش با ۲٬۱۰۰ کیلومتر بر ساعت سریع‌ترین بادهای منظومه‌اند. آبی عمیقش از متان است.',dia:'۴۹٬۲۴۴ کیلومتر',dist:'۴٫۵ میلیارد کیلومتر',age:'۴٫۶ میلیارد سال',temp:'میانگین −۲۰۰ درجه',year:'۱۶۴٫۸ سال / ۱۶٫۱ ساعت',moons:'۱۶ قمر شناخته‌شده',size:'۳٫۹ برابر زمین',feat:'سریع‌ترین بادهای منظومه شمسی اینجاست — تا ۲٬۱۰۰ کیلومتر بر ساعت، سریع‌تر از سرعت صوت.'},
+moon:{kind:'قمر زمین',name:'ماه',en:'MOON',desc:'تنها قمر زمین و تنها جایی بیرون زمین که انسان روی آن قدم گذاشته. طلوع خورشید از سطحش سیاه و خیره‌کننده است، چون هوایی برای پخش نور نیست.',dia:'۳٬۴۷۴ کیلومتر',dist:'۳۸۴٬۴۰۰ کیلومتر از زمین',age:'۴٫۵۱ میلیارد سال',temp:'−۱۷۳ تا ۱۲۷ درجه',year:'۲۷٫۳ روز / ۲۷٫۳ روز',moons:'—',size:'۰٫۲۷ برابر زمین',feat:'از ماه، زمین در آسمان ثابت می‌ایستد و طلوع خورشید ناگهانی و بدون سپیده است؛ آسمان همیشه سیاه می‌ماند و ستاره‌ها در روز هم دیده می‌شوند.'},
+jwst:{kind:'تلسکوپ فضایی • چشم طلایی بشر',name:'جیمز وب',en:'JAMES WEBB • JWST',desc:'بزرگ‌ترین تلسکوپ فضایی تاریخ، با آینهٔ طلایی ۶٫۵ متری. در نقطهٔ L2، حدود ۱٫۵ میلیون کیلومتر از زمین، می‌ایستد و به اولین کهکشان‌ها نگاه می‌کند.',dia:'آینه ۶٫۵ متر • سپر به‌اندازهٔ زمین تنیس',dist:'۱٫۵ میلیون کیلومتر از زمین',age:'پرتاب ۲۵ دسامبر ۲۰۲۱',temp:'زیر −۲۲۳ درجه (سردترین بخش)',year:'مدار ۶ ماهه دور L2',moons:'—',size:'به‌اندازهٔ یک زمین تنیس',feat:'می‌تواند نور اولین ستاره‌هایی را ببیند که ۱۳٫۵ میلیارد سال پیش روشن شدند؛ یعنی عملاً به گذشته نگاه می‌کند.'},
+hubble:{kind:'تلسکوپ فضایی • چشم کلاسیک بشر',name:'هابل',en:'HUBBLE',desc:'از ۱۹۹۰ در مدار زمین است و عمیق‌ترین عکس‌های جهان را گرفته؛ از سحابی‌ها تا «میدان عمیق» که هزاران کهکشان را در یک نقطهٔ تاریک نشان داد.',dia:'آینه ۲٫۴ متر • طول ۱۳٫۲ متر',dist:'۵۴۷ کیلومتر بالای زمین',age:'پرتاب ۲۴ آوریل ۱۹۹۰',temp:'—',year:'۹۵ دقیقه هر دور زمین',moons:'—',size:'به‌اندازهٔ یک اتوبوس',feat:'عکس «میدان عمیق هابل» از تکه‌ای به‌اندازهٔ یک دانهٔ شن در آسمان، حدود ۱۰ هزار کهکشان را نشان داد.'},
+};
+
+/* ---------- ساخت منظومه ---------- */
+const solarGroup=new THREE.Group(); scene.add(solarGroup);
+const pickables=[]; const labels=[];
+function addLabel(obj,text,y){const s=labelSprite(text);s.position.y=y;obj.add(s);labels.push(s);return s;}
+
+const sunTex=noise('#ff9d00',['#ff5e00','#ffd23e','#fff3a0']);
+const sun=new THREE.Mesh(new THREE.SphereGeometry(6,48,48),new THREE.MeshBasicMaterial({map:sunTex}));
+sun.userData.key='sun'; solarGroup.add(sun); pickables.push(sun); addLabel(sun,'خورشید',8.2);
+const glow=new THREE.Sprite(new THREE.SpriteMaterial({map:glowTexture(),transparent:true,depthWrite:false,opacity:.95}));
+glow.scale.set(34,34,1); sun.add(glow);
+
+const planets=[
+ {key:'mercury',r:14,size:.7, tex:noise('#9c8e84',['#6e625a','#c9b8a8','#4a4038']),speed:.48,rot:.02,tilt:.03},
+ {key:'venus',r:19,size:1.1, tex:noise('#e8c07a',['#d9a45a','#f2ddab','#b57a35']),speed:.35,rot:.015,tilt:.05},
+ {key:'earth',r:25,size:1.15,tex:tex(512,256,(x,w,h)=>{x.fillStyle='#1b5fd9';x.fillRect(0,0,w,h);x.fillStyle='#2fae5f';for(let i=0;i<16;i++){x.beginPath();x.ellipse(Math.random()*w,Math.random()*h,18+Math.random()*42,10+Math.random()*22,Math.random()*3,0,7);x.fill();}x.fillStyle='rgba(255,255,255,.85)';for(let i=0;i<22;i++){x.beginPath();x.ellipse(Math.random()*w,Math.random()*h,14+Math.random()*30,4+Math.random()*8,0,0,7);x.fill();}}),speed:.30,rot:.05,tilt:.41},
+ {key:'mars',r:31,size:.9, tex:noise('#c1552e',['#8a3418','#e07a4a','#5e2312']),speed:.24,rot:.05,tilt:.44},
+ {key:'jupiter',r:42,size:3.2,tex:bands([['#d8b48f',22],['#a67c52',18],['#e8d3b0',22],['#b98a5e',18],['#d8b48f',22],['#8a5f3d',16]]),speed:.13,rot:.11,tilt:.05},
+ {key:'saturn',r:53,size:2.7,tex:bands([['#e3cfa0',24],['#c9ad7a',18],['#f0e0b8',22],['#b89a68',18]]),speed:.10,rot:.10,tilt:.47},
+ {key:'uranus',r:63,size:1.9,tex:noise('#7fd4d6',['#5fb9c4','#a8e6e8','#3f8f9a']),speed:.07,rot:.07,tilt:1.71},
+ {key:'neptune',r:72,size:1.85,tex:noise('#2f5fe0',['#1e3fa8','#5a86ff','#16307a']),speed:.055,rot:.07,tilt:.49},
+];
+const planetObjs={};
+planets.forEach((p,i)=>{
+  const orbit=new THREE.LineLoop(new THREE.BufferGeometry().setFromPoints(Array.from({length:128},(_,k)=>{const a=k/128*Math.PI*2;return new THREE.Vector3(Math.cos(a)*p.r,0,Math.sin(a)*p.r);})),new THREE.LineBasicMaterial({color:0xffffff,transparent:true,opacity:.28}));
+  solarGroup.add(orbit); orbit.userData.isOrbit=true;
+  const mesh=new THREE.Mesh(new THREE.SphereGeometry(p.size,40,40),new THREE.MeshStandardMaterial({map:p.tex,roughness:.85,metalness:.05}));
+  mesh.rotation.z=p.tilt; mesh.userData={key:p.key,angle:Math.random()*Math.PI*2,r:p.r,speed:p.speed,rot:p.rot};
+  solarGroup.add(mesh); pickables.push(mesh); planetObjs[p.key]=mesh;
+  addLabel(mesh,INFO[p.key].name,p.size+1.6);
+  if(p.key==='saturn'){
+    const ringTex=tex(512,32,(x,w,h)=>{for(let i=0;i<w;i++){const v=Math.random();x.fillStyle=v>.5?`rgba(226,204,160,${.5+Math.random()*.5})`:`rgba(160,130,90,${.4+Math.random()*.4})`;x.fillRect(i,0,1,h);}});
+    ringTex.wrapS=THREE.RepeatWrapping;
+    const ring=new THREE.Mesh(new THREE.RingGeometry(p.size*1.25,p.size*2.35,96),new THREE.MeshBasicMaterial({map:ringTex,side:THREE.DoubleSide,transparent:true,opacity:.96}));
+    ring.rotation.x=Math.PI/2-.12; mesh.add(ring);
+    const ring2=new THREE.Mesh(new THREE.RingGeometry(p.size*2.45,p.size*2.7,96),new THREE.MeshBasicMaterial({color:0xcbb58a,side:THREE.DoubleSide,transparent:true,opacity:.45}));
+    ring2.rotation.x=Math.PI/2-.12; mesh.add(ring2);
+  }
+  if(p.key==='uranus'){
+    const ring=new THREE.Mesh(new THREE.RingGeometry(p.size*1.6,p.size*2.05,72),new THREE.MeshBasicMaterial({color:0xbfeef0,side:THREE.DoubleSide,transparent:true,opacity:.5}));
+    ring.rotation.x=Math.PI/2; mesh.add(ring);
+  }
+});
+
+/* ماه، جیمز وب، هابل */
+const earth=planetObjs.earth;
+const moon=new THREE.Mesh(new THREE.SphereGeometry(.32,32,32),new THREE.MeshStandardMaterial({map:noise('#b8b8b8',['#8a8a8a','#d8d8d8','#6f6f6f']),roughness:1}));
+moon.userData={key:'moon',angle:1.2}; solarGroup.add(moon); pickables.push(moon); addLabel(moon,'ماه',.85);
+const jwst=new THREE.Group();
+const shield=new THREE.Mesh(new THREE.BoxGeometry(1.5,.05,1.0),new THREE.MeshStandardMaterial({color:0xd9a441,metalness:.7,roughness:.35})); shield.position.y=-.28; jwst.add(shield);
+const mirror=new THREE.Mesh(new THREE.CylinderGeometry(.42,.42,.06,6),new THREE.MeshStandardMaterial({color:0xffd24a,metalness:.9,roughness:.2})); mirror.position.y=.05; jwst.add(mirror);
+const bus=new THREE.Mesh(new THREE.BoxGeometry(.32,.28,.32),new THREE.MeshStandardMaterial({color:0xdddddd,metalness:.6,roughness:.4})); bus.position.y=-.12; jwst.add(bus);
+jwst.userData={key:'jwst',angle:2.4}; solarGroup.add(jwst); pickables.push(mirror); mirror.userData.key='jwst'; addLabel(jwst,'جیمز وب',.9);
+const hubble=new THREE.Group();
+const tube=new THREE.Mesh(new THREE.CylinderGeometry(.22,.22,1.1,20),new THREE.MeshStandardMaterial({color:0xe8e8e8,metalness:.5,roughness:.4})); tube.userData.key='hubble'; hubble.add(tube); pickables.push(tube);
+[-1,1].forEach(s=>{const pan=new THREE.Mesh(new THREE.BoxGeometry(.9,.02,.45),new THREE.MeshStandardMaterial({color:0x2a4a9a,metalness:.6,roughness:.4}));pan.position.x=s*.62;hubble.add(pan);});
+hubble.userData={key:'hubble',angle:.4}; solarGroup.add(hubble); addLabel(hubble,'هابل',.85);
+
+/* کمربند سیارک‌ها */
+{
+  const n=1400, pos=new Float32Array(n*3);
+  for(let i=0;i<n;i++){const a=Math.random()*Math.PI*2, r=35+Math.random()*4; pos[i*3]=Math.cos(a)*r; pos[i*3+1]=(Math.random()-.5)*.7; pos[i*3+2]=Math.sin(a)*r;}
+  const g=new THREE.BufferGeometry(); g.setAttribute('position',new THREE.BufferAttribute(pos,3));
+  solarGroup.add(new THREE.Points(g,new THREE.PointsMaterial({color:0xbfae90,size:.18,transparent:true,opacity:.8})));
+}
+/* دنباله‌دار */
+const comet=new THREE.Group();
+const cometHead=new THREE.Mesh(new THREE.SphereGeometry(.45,16,16),new THREE.MeshBasicMaterial({color:0xcfe8ff})); comet.add(cometHead);
+const cometTail=new THREE.Points(new THREE.BufferGeometry().setFromPoints(Array.from({length:60},(_,i)=>new THREE.Vector3(-i*.28, i*.04, 0))),new THREE.PointsMaterial({color:0x9fd8ff,size:.55,transparent:true,opacity:.7}));
+comet.add(cometTail); comet.visible=false; solarGroup.add(comet);
+
+/* باران الماس اورانوس */
+const diamonds=new THREE.Group(); diamonds.visible=false; scene.add(diamonds);
+const diamondGeo=new THREE.OctahedronGeometry(.22);
+const diamondMat=new THREE.MeshStandardMaterial({color:0xaef4ff,metalness:.4,roughness:.15,emissive:0x226688,emissiveIntensity:.7});
+const diamondList=[];
+for(let i=0;i<130;i++){
+  const d=new THREE.Mesh(diamondGeo,diamondMat);
+  d.position.set((Math.random()-.5)*9,Math.random()*10,(Math.random()-.5)*9);
+  d.userData.v=.02+Math.random()*.05; d.rotation.set(Math.random()*3,Math.random()*3,0);
+  diamonds.add(d); diamondList.push(d);
+}
+
+/* کهکشان راه شیری */
+const galaxyGroup=new THREE.Group(); galaxyGroup.visible=false; scene.add(galaxyGroup);
+{
+  const n=14000, pos=new Float32Array(n*3), col=new Float32Array(n*3);
+  const c1=new THREE.Color(0xffe9b0), c2=new THREE.Color(0x9ecbff), c3=new THREE.Color(0xff9ecf);
+  for(let i=0;i<n;i++){
+    const arm=(i%4)/4*Math.PI*2, r=Math.pow(Math.random(),.6)*95, a=arm+r*.045+(Math.random()-.5)*.35;
+    pos[i*3]=Math.cos(a)*r; pos[i*3+1]=(Math.random()-.5)*(4+r*.06); pos[i*3+2]=Math.sin(a)*r;
+    const c=Math.random()<.6?c1:(Math.random()<.5?c2:c3); const v=.5+Math.random()*.5;
+    col[i*3]=c.r*v; col[i*3+1]=c.g*v; col[i*3+2]=c.b*v;
+  }
+  const g=new THREE.BufferGeometry(); g.setAttribute('position',new THREE.BufferAttribute(pos,3)); g.setAttribute('color',new THREE.BufferAttribute(col,3));
+  galaxyGroup.add(new THREE.Points(g,new THREE.PointsMaterial({size:1.15,vertexColors:true,transparent:true,opacity:.95})));
+  const core=new THREE.Mesh(new THREE.SphereGeometry(9,24,24),new THREE.MeshBasicMaterial({color:0xffe9b0,transparent:true,opacity:.9}));
+  galaxyGroup.add(core);
+  const coreGlow=new THREE.Sprite(new THREE.SpriteMaterial({map:glowTexture(),transparent:true,opacity:.85,depthWrite:false}));
+  coreGlow.scale.set(52,52,1); galaxyGroup.add(coreGlow);
+  const sunMarker=new THREE.Mesh(new THREE.SphereGeometry(1.1,16,16),new THREE.MeshBasicMaterial({color:0xffd24a}));
+  sunMarker.position.set(38,0,22); galaxyGroup.add(sunMarker); addLabel(sunMarker,'خورشید ما اینجاست',3);
+}
+
+/* سطح ماه برای طلوع خورشید */
+const moonGround=new THREE.Mesh(new THREE.CircleGeometry(60,48),new THREE.MeshStandardMaterial({color:0x8a8a8a,roughness:1}));
+moonGround.rotation.x=-Math.PI/2; moonGround.position.set(0,-2.4,0); moonGround.visible=false; scene.add(moonGround);
+const moonEarth=new THREE.Mesh(new THREE.SphereGeometry(4.5,32,32),new THREE.MeshStandardMaterial({map:planets[2].tex,roughness:.8}));
+moonEarth.position.set(-28,18,-70); moonEarth.visible=false; scene.add(moonEarth);
+
+/* ---------- پنل اطلاعات ---------- */
+const $=id=>document.getElementById(id);
+function showInfo(key){
+  const d=INFO[key]; if(!d) return;
+  $('pKind').textContent=d.kind; $('pName').textContent=d.name; $('pEn').textContent=d.en;
+  $('pDesc').textContent=d.desc; $('pDia').textContent=d.dia; $('pDist').textContent=d.dist;
+  $('pAge').textContent=d.age; $('pTemp').textContent=d.temp; $('pYear').textContent=d.year;
+  $('pMoons').textContent=d.moons; $('pSize').textContent=d.size; $('pFeat').textContent=d.feat;
+  document.querySelectorAll('#planetBar .chip').forEach(c=>c.classList.toggle('active',c.dataset.key===key));
+}
+const bar=$('planetBar');
+['sun','mercury','venus','earth','mars','jupiter','saturn','uranus','neptune','moon','jwst'].forEach(k=>{
+  const b=document.createElement('button'); b.className='chip'; b.dataset.key=k;
+  b.textContent=(k==='sun'?'☀️ ':k==='moon'?'🌙 ':k==='jwst'?'🔭 ':'🪐 ')+INFO[k].name;
+  b.onclick=()=>{showInfo(k); flyToKey(k);}; bar.appendChild(b);
+});
+function toast(t,s){$('toastTitle').textContent=t;$('toastText').textContent=s;$('toast').style.display='block';setTimeout(()=>$('toast').style.display='none',4200);}
+
+/* ---------- دوربین‌ها ---------- */
+let camMode='free', speed=1, paused=false, followTarget=null;
+const camInfo={free:['📷 دوربین آزاد','با موس بچرخان و با اسکرول زوم کن.'],jwst:['🔭 دوربین جیمز وب','تو کنار ماه ایستاده‌ای؛ آینهٔ طلایی روبه‌روی توست و زمین آن دور می‌درخشد.'],hubble:['📡 دوربین هابل','در مدار نزدیک زمین؛ زیر پایت زمین می‌چرخد.'],moon:['🌙 سطح ماه','طلوع خورشید از ماه: آسمان سیاه، زمین در آسمان، و خورشید ناگهان بالا می‌آید.'],saturn:['🪐 زحل از نزدیک','حلقه‌ها را ببین — میلیاردها قطعه یخ، بعضی جاها فقط ۱۰ متر ضخامت.'],sun:['☀️ خورشید از نزدیک','سوزان و خیره‌کننده. نورش ۸ دقیقه‌ای به زمین می‌رسد.'],galaxy:['🌌 کهکشان راه شیری','تو حالا بیرون منظومه‌ای؛ خورشید ما فقط یک نقطه در بازوی کهکشان است.'],uranus:['💎 باران الماس اورانوس','در عمق اورانوس، الماس مثل باران می‌بارد.']};
+function setCam(mode){
+  camMode=mode; followTarget=null;
+  document.querySelectorAll('.cam').forEach(b=>b.classList.toggle('active',b.dataset.cam===mode));
+  $('camName').textContent=camInfo[mode][0]; $('camDesc').textContent=camInfo[mode][1];
+  galaxyGroup.visible=(mode==='galaxy'); solarGroup.visible=(mode!=='galaxy');
+  moonGround.visible=(mode==='moon'); moonEarth.visible=(mode==='moon');
+  diamonds.visible=(mode==='uranus');
+  if(mode==='galaxy'){camera.position.set(0,110,170);controls.target.set(0,0,0);}
+  if(mode==='moon'){camera.position.set(0,0,6);controls.target.set(-10,10,-40);}
+  if(mode==='uranus'){showInfo('uranus');toast('💎 باران الماس در اورانوس','الماس‌های درخشان از ابرها فرو می‌ریزند — در اعماق اورانوس فشار متان را به الماس تبدیل می‌کند.');}
+  if(mode==='moon'){toast('🌅 طلوع خورشید از ماه','آسمان ماه سیاه است؛ چون هوایی نیست که نور را پخش کند. زمین آبی در آسمان می‌ایستد.');}
+  if(mode==='jwst'){showInfo('jwst');}
+  if(mode==='hubble'){showInfo('hubble');}
+  if(mode==='saturn'){showInfo('saturn');}
+  if(mode==='sun'){showInfo('sun');}
+  controls.enabled=(mode==='free'||mode==='galaxy');
+}
+document.querySelectorAll('.cam').forEach(b=>b.onclick=()=>setCam(b.dataset.cam));
+function flyToKey(key){
+  if(key==='sun'){camera.position.set(0,16,32);controls.target.set(0,0,0);return;}
+  const o=planetObjs[key]; if(o){const p=o.position.clone();camera.position.set(p.x+o.geometry.parameters.radius*4+6,p.y+7,p.z+10);controls.target.copy(p);}
+  if(key==='moon'){camera.position.set(moon.position.x+4,moon.position.y+2,moon.position.z+6);controls.target.copy(moon.position);}
+  if(key==='jwst'){setCam('jwst');}
+}
+
+/* ---------- کنترل‌ها ---------- */
+$('pauseBtn').onclick=e=>{paused=!paused;e.target.textContent=paused?'▶️ ادامه':'⏸ توقف';};
+$('speed').oninput=e=>speed=+e.target.value;
+$('orbitBtn').onclick=e=>{const on=e.target.classList.toggle('on');solarGroup.children.forEach(c=>{if(c.userData.isOrbit)c.visible=on;});};
+$('labelBtn').onclick=e=>{const on=e.target.classList.toggle('on');labels.forEach(l=>l.visible=on);};
+$('trailBtn').onclick=e=>{const on=e.target.classList.toggle('on');comet.visible=on;};
+$('resetBtn').onclick=()=>{setCam('free');camera.position.set(0,48,95);controls.target.set(0,0,0);showInfo('sun');};
+
+/* ---------- کلیک روی سیاره ---------- */
+const ray=new THREE.Raycaster(), ptr=new THREE.Vector2(); let downAt=0;
+renderer.domElement.addEventListener('pointerdown',()=>downAt=Date.now());
+renderer.domElement.addEventListener('pointerup',e=>{
+  if(Date.now()-downAt>220) return;
+  ptr.x=(e.clientX/innerWidth)*2-1; ptr.y=-(e.clientY/innerHeight)*2+1;
+  ray.setFromCamera(ptr,camera);
+  const hits=ray.intersectObjects(pickables,true);
+  if(hits.length){let o=hits[0].object; while(o && !o.userData.key) o=o.parent; if(o) showInfo(o.userData.key);}
+});
+
+/* ---------- حلقهٔ انیمیشن ---------- */
+const clock=new THREE.Clock();
+function animate(){
+  requestAnimationFrame(animate);
+  const dt=Math.min(clock.getDelta(),.05);
+  const t=clock.elapsedTime;
+  if(!paused){
+    sun.rotation.y+=dt*.02*speed;
+    planets.forEach(p=>{
+      const m=planetObjs[p.key]; m.userData.angle+=dt*p.speed*.28*speed;
+      m.position.set(Math.cos(m.userData.angle)*p.r,0,Math.sin(m.userData.angle)*p.r);
+      m.rotation.y+=dt*p.rot*speed;
+    });
+    moon.userData.angle+=dt*.55*speed;
+    const e=planetObjs.earth.position;
+    moon.position.set(e.x+Math.cos(moon.userData.angle)*2.4,e.y+Math.sin(moon.userData.angle)*.25,e.z+Math.sin(moon.userData.angle)*2.4);
+    jwst.userData.angle+=dt*.12*speed;
+    jwst.position.set(e.x+Math.cos(jwst.userData.angle)*4.2,.6,e.z+Math.sin(jwst.userData.angle)*4.2);
+    jwst.lookAt(e);
+    hubble.userData.angle+=dt*.9*speed;
+    hubble.position.set(e.x+Math.cos(hubble.userData.angle)*1.9,Math.sin(hubble.userData.angle)*.5,e.z+Math.sin(hubble.userData.angle)*1.9);
+    hubble.lookAt(e);
+    if(comet.visible){const a=t*.07;comet.position.set(Math.cos(a)*58,Math.sin(a*2)*4,Math.sin(a)*58);comet.lookAt(0,0,0);}
+    galaxyGroup.rotation.y+=dt*.008*speed;
+    moonEarth.rotation.y+=dt*.01;
+  }
+  if(diamonds.visible){
+    const u=planetObjs.uranus.position; diamonds.position.copy(u);
+    diamondList.forEach(d=>{d.position.y-=d.userData.v; d.rotation.x+=.02; d.rotation.y+=.03; if(d.position.y<-5)d.position.y=5;});
+  }
+  if(camMode==='jwst'){const p=jwst.position.clone();camera.position.lerp(new THREE.Vector3(p.x+2.2,p.y+1.1,p.z+2.6),.06);camera.lookAt(jwst.position);}
+  if(camMode==='hubble'){const p=hubble.position.clone();camera.position.lerp(new THREE.Vector3(p.x+1.6,p.y+.9,p.z+1.8),.06);camera.lookAt(planetObjs.earth.position);}
+  if(camMode==='saturn'){const p=planetObjs.saturn.position.clone();camera.position.lerp(new THREE.Vector3(p.x+9,p.y+5,p.z+9),.05);camera.lookAt(p);}
+  if(camMode==='sun'){camera.position.lerp(new THREE.Vector3(14,7,14),.05);camera.lookAt(0,0,0);}
+  if(camMode==='moon'){camera.lookAt(-28,18,-70);}
+  if(camMode==='uranus'){const p=planetObjs.uranus.position.clone();camera.position.lerp(new THREE.Vector3(p.x+7,p.y+4,p.z+8),.05);camera.lookAt(p);}
+  controls.update(); renderer.render(scene,camera);
+}
+animate();
+addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);});
+setTimeout(()=>document.getElementById('loader').classList.add('hide'),700);
+showInfo('sun');
+</script>
+</body>
+</html>
